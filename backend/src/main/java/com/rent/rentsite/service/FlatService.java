@@ -27,7 +27,9 @@ public class FlatService {
             errors.add("Необходимо указать адрес квартиры.");
         }
 
-        if (flat.getArea() == null || flat.getArea().signum() <= 0) {
+        if (flat.getArea() == null
+                || !Double.isFinite(flat.getArea())
+                || flat.getArea() <= 0) {
             errors.add("Площадь квартиры должна быть положительной.");
         }
 
@@ -48,7 +50,7 @@ public class FlatService {
 
     public boolean canBeRented(Flat flat) {
         return validateFlat(flat).isEmpty()
-                && flat.getStatus() == FlatStatus.FREE;
+                && flat.getStatus() == FlatStatus.AVAILABLE;
     }
 
     public List<Flat> findAvailableFlats(List<Flat> flats) {

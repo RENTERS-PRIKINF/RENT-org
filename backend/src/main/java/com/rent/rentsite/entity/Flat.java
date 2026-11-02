@@ -1,37 +1,38 @@
 package com.rent.rentsite.entity;
 
-import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Flat {
 
     private Long flatId;
     private Long landlordId;
     private String address;
-    private BigDecimal area;
+    private Double area;
     private Integer rooms;
     private Integer floor;
     private String cadastralNumber;
     private FlatStatus status;
     private String description;
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now(Clock.systemUTC());
+    private List<String> listingUrls = new ArrayList<>();
+    private List<FlatMedia> media = new ArrayList<>();
 
     protected Flat() {
     }
 
     public Flat(
-            Long flatId,
             Long landlordId,
             String address,
-            BigDecimal area,
+            Double area,
             Integer rooms,
             Integer floor,
             String cadastralNumber,
             FlatStatus status,
-            String description,
-            LocalDateTime createdAt
+            String description
     ) {
-        this.flatId = flatId;
         this.landlordId = landlordId;
         this.address = address;
         this.area = area;
@@ -40,15 +41,10 @@ public class Flat {
         this.cadastralNumber = cadastralNumber;
         this.status = status;
         this.description = description;
-        this.createdAt = createdAt;
     }
 
     public Long getFlatId() {
         return flatId;
-    }
-
-    public void setFlatId(Long flatId) {
-        this.flatId = flatId;
     }
 
     public Long getLandlordId() {
@@ -67,11 +63,11 @@ public class Flat {
         this.address = address;
     }
 
-    public BigDecimal getArea() {
+    public Double getArea() {
         return area;
     }
 
-    public void setArea(BigDecimal area) {
+    public void setArea(Double area) {
         this.area = area;
     }
 
@@ -119,7 +115,56 @@ public class Flat {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public List<String> getListingUrls() {
+        return List.copyOf(listingUrls);
+    }
+
+    public void addListingUrl(String url) {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Ссылка на объявление не должна быть пустой."
+            );
+        }
+
+        String normalizedUrl = url.trim();
+
+        if (!listingUrls.contains(normalizedUrl)) {
+            listingUrls.add(normalizedUrl);
+        }
+    }
+
+    public void removeListingUrl(String url) {
+        listingUrls.remove(url.trim());
+    }
+
+    public List<FlatMedia> getMedia() {
+        return List.copyOf(media);
+    }
+
+    public void addMedia(FlatMedia flatMedia) {
+        if (flatMedia == null) {
+            throw new IllegalArgumentException(
+                    "Медиафайл не должен быть null."
+            );
+        }
+
+        if (flatMedia.getFlat() != null && flatMedia.getFlat() != this) {
+            throw new IllegalArgumentException(
+                    "Медиафайл уже привязан к другой квартире."
+            );
+        }
+
+        if (media.contains(flatMedia)) {
+            return;
+        }
+
+        media.add(flatMedia);
+        flatMedia.setFlat(this);
+    }
+
+    public void removeMedia(FlatMedia flatMedia) {
+        if (media.remove(flatMedia)) {
+            flatMedia.setFlat(null);
+        }
     }
 }
