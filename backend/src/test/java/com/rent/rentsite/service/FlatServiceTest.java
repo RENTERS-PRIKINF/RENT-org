@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,13 +21,12 @@ class FlatServiceTest {
                 1L,
                 10L,
                 "ул. Ленина, 10",
-                new BigDecimal("45.5"),
+                45.5,
                 2,
                 3,
                 "12345678901234567890",
-                FlatStatus.FREE,
-                "Описание квартиры",
-                LocalDateTime.now()
+                FlatStatus.AVAILABLE,
+                "Описание квартиры"
         );
     }
 
@@ -110,7 +107,7 @@ class FlatServiceTest {
     @Test
     void validateFlat_shouldReturnError_whenAreaIsZero() {
         Flat flat = createValidFlat();
-        flat.setArea(BigDecimal.ZERO);
+        flat.setArea(0.0);
 
         List<String> errors = flatService.validateFlat(flat);
 
@@ -122,7 +119,7 @@ class FlatServiceTest {
     @Test
     void validateFlat_shouldReturnError_whenAreaIsNegative() {
         Flat flat = createValidFlat();
-        flat.setArea(new BigDecimal("-10"));
+        flat.setArea(-10.0);
 
         List<String> errors = flatService.validateFlat(flat);
 
@@ -218,7 +215,7 @@ class FlatServiceTest {
         Flat flat = createValidFlat();
         flat.setLandlordId(null);
         flat.setAddress("");
-        flat.setArea(BigDecimal.ZERO);
+        flat.setArea(0.0);
         flat.setRooms(0);
         flat.setFloor(-1);
         flat.setStatus(null);
@@ -229,7 +226,7 @@ class FlatServiceTest {
     }
 
     @Test
-    void canBeRented_shouldReturnTrue_whenFlatIsValidAndFree() {
+    void canBeRented_shouldReturnTrue_whenFlatIsValidAndAvailable() {
         Flat flat = createValidFlat();
 
         boolean result = flatService.canBeRented(flat);
@@ -241,9 +238,9 @@ class FlatServiceTest {
     @EnumSource(
             value = FlatStatus.class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = {"FREE"}
+            names = {"AVAILABLE"}
     )
-    void canBeRented_shouldReturnFalse_whenFlatIsNotFree(
+    void canBeRented_shouldReturnFalse_whenFlatIsNotAvailable(
             FlatStatus status
     ) {
         Flat flat = createValidFlat();
@@ -257,7 +254,7 @@ class FlatServiceTest {
     @Test
     void canBeRented_shouldReturnFalse_whenFlatIsInvalid() {
         Flat flat = createValidFlat();
-        flat.setArea(BigDecimal.ZERO);
+        flat.setArea(0.0);
 
         boolean result = flatService.canBeRented(flat);
 
@@ -272,17 +269,16 @@ class FlatServiceTest {
     }
 
     @Test
-    void findAvailableFlats_shouldReturnOnlyValidFreeFlats() {
+    void findAvailableFlats_shouldReturnOnlyValidAvailableFlats() {
         Flat availableFlat = createValidFlat();
 
         Flat rentedFlat = createValidFlat();
         rentedFlat.setStatus(FlatStatus.RENTED);
 
         Flat invalidFlat = createValidFlat();
-        invalidFlat.setArea(BigDecimal.ZERO);
+        invalidFlat.setArea(0.0);
 
         Flat secondAvailableFlat = createValidFlat();
-        secondAvailableFlat.setFlatId(2L);
 
         List<Flat> flats = Arrays.asList(
                 availableFlat,
@@ -357,6 +353,6 @@ class FlatServiceTest {
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("Новый статус не должен быть null.");
 
-        assertThat(flat.getStatus()).isEqualTo(FlatStatus.FREE);
+        assertThat(flat.getStatus()).isEqualTo(FlatStatus.AVAILABLE);
     }
 }
