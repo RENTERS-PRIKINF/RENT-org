@@ -1,0 +1,58 @@
+name: Auto Changelog
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*'          # срабатывает на теги вида v1.0.0, v0.1.0 и т.д.
+
+permissions:
+  contents: write
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install conventional-changelog
+        run: npm install --no-save conventional-changelog conventional-changelog-angular
+
+      - name: Generate Changelog
+        run: |
+          if [ -f .last-changelog-commit ]; then
+            FROM=$(cat .last-changelog-commit)
+            echo "Генерируем от коммита: $FROM"
+            npx conventional-changelog -p angular -i CHANGELOG.md -s --from "$FROM"
+          else
+            echo "Файл-маркер не найден. Генерируем всю историю (первый запуск)."
+            npx conventional-changelog -p angular -i CHANGELOG.md -s -r 0
+          fi
+
+          # Сохраняем текущий коммит как границу
+          git rev-parse HEAD > .last-changelog-commit
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet CHANGELOG.md .last-changelog-commit; then
+            echo "Нет новых изменений для CHANGELOG"
+            exit 0
+          fi
+
+          git add CHANGELOG.md .last-changelog-commit
+          git commit -m "docs: update changelog [skip ci]"
+          git push
