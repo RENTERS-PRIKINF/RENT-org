@@ -3,7 +3,7 @@ package com.rent.rentsite.entity;
 public class FlatMedia {
 
     private Long mediaId;
-    private Flat flat; 
+    private Long flatId; 
     private String fileUrl;
     private MediaType mediaType;
 
@@ -27,11 +27,11 @@ public class FlatMedia {
         return mediaType;
     }
 
-    public Flat getFlat() {
-        return flat;
+    public Long getFlatId() {
+        return flatId;
     }
 
-    void setFlat(Flat flat) {
-        this.flat = flat;
+    void setFlatId(Long flatId) {
+        this.flatId = flatId;
     }
 }

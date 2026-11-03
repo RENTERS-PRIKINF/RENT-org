@@ -24,6 +24,7 @@ public class Flat {
     }
 
     public Flat(
+            Long flatId,                //TODO: Добавить автогенерацию
             Long landlordId,
             String address,
             Double area,
@@ -33,6 +34,7 @@ public class Flat {
             FlatStatus status,
             String description
     ) {
+        this.flatId = flatId;           //TODO: Добавить автогенерацию
         this.landlordId = landlordId;
         this.address = address;
         this.area = area;
@@ -134,7 +136,9 @@ public class Flat {
     }
 
     public void removeListingUrl(String url) {
-        listingUrls.remove(url.trim());
+         if (url != null) {
+            listingUrls.remove(url.trim());
+        }
     }
 
     public List<FlatMedia> getMedia() {
@@ -148,7 +152,7 @@ public class Flat {
             );
         }
 
-        if (flatMedia.getFlat() != null && flatMedia.getFlat() != this) {
+        if (flatMedia.getFlatId() != null && !flatMedia.getFlatId().equals(this.flatId)) {
             throw new IllegalArgumentException(
                     "Медиафайл уже привязан к другой квартире."
             );
@@ -159,12 +163,12 @@ public class Flat {
         }
 
         media.add(flatMedia);
-        flatMedia.setFlat(this);
+        flatMedia.setFlatId(this.flatId);
     }
 
     public void removeMedia(FlatMedia flatMedia) {
         if (media.remove(flatMedia)) {
-            flatMedia.setFlat(null);
+            flatMedia.setFlatId(null);
         }
     }
 }
