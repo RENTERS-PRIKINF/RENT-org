@@ -2,7 +2,7 @@ name: Auto Changelog
 
 on:
   push:
-    branches: [main]
+    branches: [main, test/changelog-tags]
     tags:
       - 'v*'          # срабатывает на теги вида v1.0.0, v0.1.0 и т.д.
 
