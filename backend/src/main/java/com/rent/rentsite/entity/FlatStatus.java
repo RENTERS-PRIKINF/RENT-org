@@ -1,8 +1,8 @@
 package com.rent.rentsite.entity;
 
 public enum FlatStatus {
-    FREE,
+    AVAILABLE,
     RENTED,
-    REPAIR,
+    RENOVATION,
     BOOKED
 }
