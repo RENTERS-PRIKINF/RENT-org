@@ -1,2 +1,25 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Запуск проверок перед коммитом..."
+
+# 1. ЛИНТИНГ БЭКЕНДА (Checkstyle)
+if [ -d "backend" ]; then
+  echo "Проверка Java (Checkstyle)..."
+  cd backend
+  
+  # Запускаем Maven. Если Checkstyle найдет ошибки (при failOnViolation=true), 
+  # команда завершится с ошибкой, и || exit 1 заблокирует коммит.
+  mvn validate || exit 1
+  
+  cd ..
+fi
+
+# 2. для фронте
+
+# 3. ГЕНЕРАЦИЯ CHANGELOG (ваш текущий код)
+echo "Обновление CHANGELOG..."
 npx conventional-changelog -p angular -i CHANGELOG.md -s
 git add CHANGELOG.md
+
+echo "Все проверки пройдены! Коммит разрешен."
