@@ -39,9 +39,9 @@ INSERT INTO public.contracts
     (contract_id, name, doc_type, file_url, is_active)
 OVERRIDING SYSTEM VALUE
 VALUES
-    (1, 'Договор аренды № 1', 'lease', '/test/contracts/lease-1.pdf', true),
+    (1, 'Договор аренды № 1', 'rent', '/test/contracts/rent-1.pdf', true),
     (2, 'Акт передачи № 1', 'act_handover', '/test/contracts/handover-1.pdf', true),
-    (3, 'Договор аренды № 2', 'lease', '/test/contracts/lease-2.pdf', true),
+    (3, 'Договор аренды № 2', 'rent', '/test/contracts/rent-2.pdf', true),
     (4, 'Акт возврата № 3', 'act_return', '/test/contracts/return-3.pdf', true),
     (5, 'Дополнительное соглашение № 1', 'amendment', '/test/contracts/amendment-1.pdf', true);
 
@@ -49,10 +49,10 @@ INSERT INTO public.contract_templates
     (template_id, name, type, file_url, owner_id, version)
 OVERRIDING SYSTEM VALUE
 VALUES
-    (1, 'Шаблон договора аренды', 'lease', '/test/templates/lease-template.docx', 1, 1),
+    (1, 'Шаблон договора аренды', 'rent', '/test/templates/rent-template.docx', 1, 1),
     (2, 'Шаблон акта передачи', 'act_handover', '/test/templates/handover-template.docx', NULL, 2);
 
--- 5. Leases
+-- 5. rents
 -- The trigger in V2 changes flat 1 to 'rented' and flat 3 to 'available'.
 INSERT INTO public.rents
     (rent_id, flat_id, tenant_id, contract_id, handover_act_id, return_act_id,
