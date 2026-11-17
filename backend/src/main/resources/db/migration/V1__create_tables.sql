@@ -4,7 +4,7 @@
 
 -- Enum types
 CREATE TYPE public.doc_type AS ENUM (
-    'lease',
+    'rent',
     'act_handover',
     'act_return',
     'amendment'
@@ -131,7 +131,7 @@ CREATE TABLE public.rent_amendments (
     contract_id bigint,
     change_date date DEFAULT now() NOT NULL,
     description text,
-    CONSTRAINT lease_amendments_pkey PRIMARY KEY (amendment_id)
+    CONSTRAINT rent_amendments_pkey PRIMARY KEY (amendment_id)
 );
 
 CREATE TABLE public.rents (
@@ -147,7 +147,7 @@ CREATE TABLE public.rents (
     deposit_amount numeric(15,2),
     status public.rent_status DEFAULT 'pending'::public.rent_status NOT NULL,
     rent_period public.rent_period NOT NULL,
-    CONSTRAINT leases_pkey PRIMARY KEY (rent_id)
+    CONSTRAINT rents_pkey PRIMARY KEY (rent_id)
 );
 
 CREATE TABLE public.meter_readings (
