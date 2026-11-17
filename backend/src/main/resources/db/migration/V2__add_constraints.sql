@@ -19,10 +19,10 @@ ALTER TABLE ONLY public.users
 
 -- CHECK constraints
 ALTER TABLE public.rents
-    ADD CONSTRAINT chk_lease_amount CHECK ((rent_amount > (0)::numeric));
+    ADD CONSTRAINT chk_rent_amount CHECK ((rent_amount > (0)::numeric));
 
 ALTER TABLE public.rents
-    ADD CONSTRAINT chk_lease_dates CHECK ((end_at > start_at));
+    ADD CONSTRAINT chk_rent_dates CHECK ((end_at > start_at));
 
 ALTER TABLE public.meter_readings
     ADD CONSTRAINT chk_reading_value CHECK ((value >= (0)::numeric));
@@ -43,7 +43,7 @@ ALTER TABLE public.flats
     ADD CONSTRAINT chk_flat_floor CHECK (floor IS NULL OR floor >= 0);
 
 ALTER TABLE public.rents
-    ADD CONSTRAINT chk_lease_deposit CHECK (deposit_amount IS NULL OR deposit_amount > 0);
+    ADD CONSTRAINT chk_rent_deposit CHECK (deposit_amount IS NULL OR deposit_amount > 0);
 
 ALTER TABLE public.contract_templates
     ADD CONSTRAINT chk_template_version CHECK (version > 0);
@@ -59,25 +59,25 @@ ALTER TABLE ONLY public.landlords
     ADD CONSTRAINT landlords_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.rent_amendments
-    ADD CONSTRAINT lease_amendments_contract_id_fkey FOREIGN KEY (contract_id) REFERENCES public.contracts(contract_id) ON DELETE SET NULL;
+    ADD CONSTRAINT rent_amendments_contract_id_fkey FOREIGN KEY (contract_id) REFERENCES public.contracts(contract_id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY public.rent_amendments
-    ADD CONSTRAINT lease_amendments_lease_id_fkey FOREIGN KEY (rent_id) REFERENCES public.rents(rent_id) ON DELETE CASCADE;
+    ADD CONSTRAINT rent_amendments_rent_id_fkey FOREIGN KEY (rent_id) REFERENCES public.rents(rent_id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.rents
-    ADD CONSTRAINT leases_contract_id_fkey FOREIGN KEY (contract_id) REFERENCES public.contracts(contract_id) ON DELETE SET NULL;
+    ADD CONSTRAINT rents_contract_id_fkey FOREIGN KEY (contract_id) REFERENCES public.contracts(contract_id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY public.rents
-    ADD CONSTRAINT leases_flat_id_fkey FOREIGN KEY (flat_id) REFERENCES public.flats(flat_id) ON DELETE RESTRICT;
+    ADD CONSTRAINT rents_flat_id_fkey FOREIGN KEY (flat_id) REFERENCES public.flats(flat_id) ON DELETE RESTRICT;
 
 ALTER TABLE ONLY public.rents
-    ADD CONSTRAINT leases_handover_act_id_fkey FOREIGN KEY (handover_act_id) REFERENCES public.contracts(contract_id) ON DELETE SET NULL;
+    ADD CONSTRAINT rents_handover_act_id_fkey FOREIGN KEY (handover_act_id) REFERENCES public.contracts(contract_id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY public.rents
-    ADD CONSTRAINT leases_return_act_id_fkey FOREIGN KEY (return_act_id) REFERENCES public.contracts(contract_id) ON DELETE SET NULL;
+    ADD CONSTRAINT rents_return_act_id_fkey FOREIGN KEY (return_act_id) REFERENCES public.contracts(contract_id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY public.rents
-    ADD CONSTRAINT leases_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(tenant_id) ON DELETE RESTRICT;
+    ADD CONSTRAINT rents_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES public.tenants(tenant_id) ON DELETE RESTRICT;
 
 ALTER TABLE ONLY public.meter_readings
     ADD CONSTRAINT meter_readings_entered_by_fkey FOREIGN KEY (entered_by) REFERENCES public.users(user_id) ON DELETE RESTRICT;
@@ -92,7 +92,7 @@ ALTER TABLE ONLY public.notifications
     ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.payments
-    ADD CONSTRAINT payments_lease_id_fkey FOREIGN KEY (rent_id) REFERENCES public.rents(rent_id) ON DELETE CASCADE;
+    ADD CONSTRAINT payments_rent_id_fkey FOREIGN KEY (rent_id) REFERENCES public.rents(rent_id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.property_media
     ADD CONSTRAINT property_media_flat_id_fkey FOREIGN KEY (flat_id) REFERENCES public.flats(flat_id) ON DELETE CASCADE;
@@ -107,10 +107,10 @@ ALTER TABLE ONLY public.tenants
     ADD CONSTRAINT tenants_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 -- Business unique index
-CREATE UNIQUE INDEX one_active_lease_per_flat ON public.rents USING btree (flat_id) WHERE (status = 'active'::public.rent_status);
+CREATE UNIQUE INDEX one_active_rent_per_flat ON public.rents USING btree (flat_id) WHERE (status = 'active'::public.rent_status);
 
 -- Trigger functions
-CREATE FUNCTION public.trg_lease_status_change() RETURNS trigger
+CREATE FUNCTION public.trg_rent_status_change() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -142,12 +142,12 @@ END;
 $$;
 
 -- Triggers
-CREATE TRIGGER trg_lease_status_change AFTER INSERT OR UPDATE OF status ON public.rents FOR EACH ROW EXECUTE FUNCTION public.trg_lease_status_change();
+CREATE TRIGGER trg_rent_status_change AFTER INSERT OR UPDATE OF status ON public.rents FOR EACH ROW EXECUTE FUNCTION public.trg_rent_status_change();
 
 CREATE TRIGGER trg_requests_status_change BEFORE UPDATE ON public.requests FOR EACH ROW EXECUTE FUNCTION public.trg_requests_resolved_at();
 
 -- Indexes (excluding redundant indexes)
-CREATE INDEX idx_amendments_lease ON public.rent_amendments USING btree (rent_id);
+CREATE INDEX idx_amendments_rent ON public.rent_amendments USING btree (rent_id);
 
 CREATE INDEX idx_contracts_kind ON public.contracts USING btree (doc_type);
 
@@ -155,13 +155,13 @@ CREATE INDEX idx_flats_landlord ON public.flats USING btree (landlord_id);
 
 CREATE INDEX idx_flats_status ON public.flats USING btree (status);
 
-CREATE INDEX idx_leases_end_date ON public.rents USING btree (end_at);
+CREATE INDEX idx_rents_end_date ON public.rents USING btree (end_at);
 
-CREATE INDEX idx_leases_flat ON public.rents USING btree (flat_id);
+CREATE INDEX idx_rents_flat ON public.rents USING btree (flat_id);
 
-CREATE INDEX idx_leases_status ON public.rents USING btree (status);
+CREATE INDEX idx_rents_status ON public.rents USING btree (status);
 
-CREATE INDEX idx_leases_tenant ON public.rents USING btree (tenant_id);
+CREATE INDEX idx_rents_tenant ON public.rents USING btree (tenant_id);
 
 CREATE INDEX idx_meters_flat ON public.meters USING btree (flat_id);
 
@@ -177,7 +177,7 @@ CREATE INDEX idx_payments_date ON public.payments USING btree (payment_date);
 
 CREATE INDEX idx_payments_dir ON public.payments USING btree (direction);
 
-CREATE INDEX idx_payments_lease ON public.payments USING btree (rent_id);
+CREATE INDEX idx_payments_rent ON public.payments USING btree (rent_id);
 
 CREATE INDEX idx_payments_type ON public.payments USING btree (type);
 
