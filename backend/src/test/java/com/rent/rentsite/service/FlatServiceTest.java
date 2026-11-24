@@ -18,7 +18,6 @@ class FlatServiceTest {
 
     private Flat createValidFlat() {
         return new Flat(
-                1L,
                 10L,
                 "ул. Ленина, 10",
                 45.5,

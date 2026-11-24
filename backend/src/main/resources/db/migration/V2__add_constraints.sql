@@ -2,6 +2,7 @@
 -- All existing ON DELETE rules preserved; extra CHECKs agreed by team.
 
 -- UNIQUE constraints
+
 ALTER TABLE ONLY public.landlords
     ADD CONSTRAINT landlords_user_id_key UNIQUE (user_id);
 

@@ -1,30 +1,61 @@
 package com.rent.rentsite.entity;
 
-import java.time.Clock;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "flats")
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Flat {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "flat_id")
     private Long flatId;
+
+    @Column(name = "landlord_id", nullable = false)
     private Long landlordId;
+    
+    @Column(name = "address", nullable = false, length = 250)
     private String address;
+
+    @Column(name = "area", nullable = false)
     private Double area;
+
+    @Column(name = "rooms", nullable = false)
     private Integer rooms;
+
+    @Column(name = "floor")
     private Integer floor;
+
+    @Column(name = "cadastral_number", length = 25)
     private String cadastralNumber;
-    private FlatStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 32)
+    private FlatStatus status = FlatStatus.AVAILABLE;
+
+    @Column(name = "description", length = 1000)
     private String description;
-    private LocalDateTime createdAt = LocalDateTime.now(Clock.systemUTC());
-    private List<String> listingUrls = new ArrayList<>();
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "flat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FlatMedia> media = new ArrayList<>();
 
-    protected Flat() {
-    }
-
     public Flat(
-            Long flatId,                //TODO: Добавить автогенерацию
             Long landlordId,
             String address,
             Double area,
@@ -34,111 +65,14 @@ public class Flat {
             FlatStatus status,
             String description
     ) {
-        this.flatId = flatId;           //TODO: Добавить автогенерацию
         this.landlordId = landlordId;
         this.address = address;
         this.area = area;
         this.rooms = rooms;
         this.floor = floor;
         this.cadastralNumber = cadastralNumber;
-        this.status = status;
+        this.status = status != null ? status : FlatStatus.AVAILABLE;
         this.description = description;
-    }
-
-    public Long getFlatId() {
-        return flatId;
-    }
-
-    public Long getLandlordId() {
-        return landlordId;
-    }
-
-    public void setLandlordId(Long landlordId) {
-        this.landlordId = landlordId;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Double getArea() {
-        return area;
-    }
-
-    public void setArea(Double area) {
-        this.area = area;
-    }
-
-    public Integer getRooms() {
-        return rooms;
-    }
-
-    public void setRooms(Integer rooms) {
-        this.rooms = rooms;
-    }
-
-    public Integer getFloor() {
-        return floor;
-    }
-
-    public void setFloor(Integer floor) {
-        this.floor = floor;
-    }
-
-    public String getCadastralNumber() {
-        return cadastralNumber;
-    }
-
-    public void setCadastralNumber(String cadastralNumber) {
-        this.cadastralNumber = cadastralNumber;
-    }
-
-    public FlatStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(FlatStatus status) {
-        this.status = status;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public List<String> getListingUrls() {
-        return List.copyOf(listingUrls);
-    }
-
-    public void addListingUrl(String url) {
-        if (url == null || url.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Ссылка на объявление не должна быть пустой."
-            );
-        }
-
-        String normalizedUrl = url.trim();
-
-        if (!listingUrls.contains(normalizedUrl)) {
-            listingUrls.add(normalizedUrl);
-        }
-    }
-
-    public void removeListingUrl(String url) {
-         if (url != null) {
-            listingUrls.remove(url.trim());
-        }
     }
 
     public List<FlatMedia> getMedia() {
@@ -147,28 +81,21 @@ public class Flat {
 
     public void addMedia(FlatMedia flatMedia) {
         if (flatMedia == null) {
-            throw new IllegalArgumentException(
-                    "Медиафайл не должен быть null."
-            );
+            throw new IllegalArgumentException("Медиафайл не должен быть null.");
         }
-
-        if (flatMedia.getFlatId() != null && !flatMedia.getFlatId().equals(this.flatId)) {
-            throw new IllegalArgumentException(
-                    "Медиафайл уже привязан к другой квартире."
-            );
+        if (flatMedia.getFlat() != null && !flatMedia.getFlat().equals(this)) {
+            throw new IllegalArgumentException("Медиафайл уже привязан к другой квартире.");
         }
-
         if (media.contains(flatMedia)) {
             return;
         }
-
         media.add(flatMedia);
-        flatMedia.setFlatId(this.flatId);
+        flatMedia.setFlat(this);
     }
 
     public void removeMedia(FlatMedia flatMedia) {
         if (media.remove(flatMedia)) {
-            flatMedia.setFlatId(null);
+            flatMedia.setFlat(null);
         }
     }
 }
