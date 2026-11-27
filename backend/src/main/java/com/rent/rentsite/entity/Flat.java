@@ -1,7 +1,6 @@
 package com.rent.rentsite.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +14,7 @@ import java.util.List;
 @Table(name = "flats")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class Flat {
 
     @Id
@@ -25,7 +24,7 @@ public class Flat {
 
     @Column(name = "landlord_id", nullable = false)
     private Long landlordId;
-    
+
     @Column(name = "address", nullable = false, length = 250)
     private String address;
 
@@ -41,8 +40,8 @@ public class Flat {
     @Column(name = "cadastral_number", length = 25)
     private String cadastralNumber;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 32)
+    @Convert(converter = FlatStatusConverter.class)
+    @Column(name = "status", nullable = false)
     private FlatStatus status = FlatStatus.AVAILABLE;
 
     @Column(name = "description", length = 1000)
